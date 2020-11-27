@@ -1,3 +1,5 @@
+import logging
+
 from django.db.models import F
 from rest_framework import status
 from rest_framework.generics import get_object_or_404, ListAPIView
@@ -7,6 +9,8 @@ from rest_framework.decorators import api_view
 
 from product_api.models import Product
 from product_api.api.serializers import ProductSerializer
+
+logger = logging.getLogger(__name__)
 
 
 @api_view(['GET'])
@@ -20,9 +24,9 @@ def api_detail_product_view(request, uuid):
 @api_view(['POST'])
 def api_create_product_view(request):
     serializer = ProductSerializer(data=request.data)
-
     if serializer.is_valid():
         serializer.save()
+        # Logger in model.py
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -51,8 +55,10 @@ def api_delete_product_view(request, uuid):
     data = {}
     if operation:
         data['success'] = 'delete successful'
+        logger.info(f'{product.name} - {product.uuid} deleted from DB')
     else:
         data['failure'] = 'delete failed'
+        logger.warning(f'{product.name} - {product.uuid} failed to delete from DB')
 
     return Response(data=data, status=status.HTTP_200_OK)
 

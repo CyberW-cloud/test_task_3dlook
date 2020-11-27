@@ -31,12 +31,3 @@ def upload_location(instance, filename):
     dir_path = os.path.normpath('images/product/')
     file_path = os.path.join(dir_path, filename)
     return file_path
-
-
-
-# @time_spent
-# def rotate_logo(filepath):
-#     image = Image.open(filepath)
-#     image = image.rotate(180)
-#     image.save(filepath)
-#     image.close()
