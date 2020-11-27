@@ -10,12 +10,52 @@ from product_api.models import Product
 from product_api.api.serializers import ProductSerializer
 
 
-@api_view(['GET', ])
+@api_view(['GET'])
 def api_detail_product_view(request, uuid):
     product = get_object_or_404(Product.objects.all(), uuid=uuid)
     serializer = ProductSerializer(product)
 
     return Response(serializer.data)
+
+
+@api_view(['POST'])
+def api_create_product_view(request):
+    serializer = ProductSerializer(data=request.data)
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['PUT'])
+def api_update_product_view(request, uuid):
+    # Check if the product not yet modified
+    product = get_object_or_404(Product.objects.all(), uuid=uuid, updated=F('created'))
+    serializer = ProductSerializer(instance=product, data=request.data, partial=True)
+
+    data = {}
+    if serializer.is_valid():
+        serializer.save()
+        data['success'] = 'update successful'
+        return Response(data=data, status=status.HTTP_200_OK)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['DELETE'])
+def api_delete_product_view(request, uuid):
+    product = get_object_or_404(Product.objects.all(), uuid=uuid)
+    operation = product.delete()
+
+    data = {}
+    if operation:
+        data['success'] = 'delete successful'
+    else:
+        data['failure'] = 'delete failed'
+
+    return Response(data=data, status=status.HTTP_200_OK)
 
 
 class ApiAllProductsView(ListAPIView):
@@ -30,7 +70,10 @@ class ApiAllProductsView(ListAPIView):
         """
         queryset = Product.objects.all()
         modified = self.request.query_params.get('modified', None)
+
         if modified == "true":
             queryset = queryset.exclude(updated=F('created'))
+        elif modified == "false":
+            queryset = queryset.filter(updated=F('created'))
 
         return queryset
