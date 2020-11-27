@@ -1,12 +1,7 @@
-import logging
-
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = '-+fr4zg22%9qfbog6boi7n57z5!k!#y1@t=#m7*-7lv8on-*mt'
-
-DEBUG = True
 
 ALLOWED_HOSTS = []
 
